@@ -76,4 +76,8 @@ public class Chip {
         }
 
     }
+
+    public byte[] getDisplay() {
+        return display;
+    }
 }
