@@ -1,29 +1,27 @@
 package emu;
 
-import chip.Chip;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-public class ChipScene extends Scene {
+public class Screen {
+
     private static final int PIXEL_SIZE = 10;
     private static final int WIDTH = 64;
     private static final int HEIGHT = 32;
-    private Chip chip;
-    private GridPane pane;
 
-    public ChipScene(GridPane pane, Chip chip) {
-        super(pane);
-        this.chip = chip;
-        this.pane = pane;
-        chip.init();
-        paint();
+    private Scene scene;
+    private GridPane gridPane;
+    private byte[] display;
+
+    public Screen(Scene scene, GridPane gridPane, byte[] display) {
+        this.scene = scene;
+        this.gridPane = gridPane;
+        this.display = display;
     }
 
     public void paint() {
-        byte[] display = chip.getDisplay();
         int index = 0;
 
         for (int y = 0; y < WIDTH; y++) {
@@ -36,7 +34,8 @@ public class ChipScene extends Scene {
                     pixel.setFill(Color.WHITE);
                 }
 
-                pane.add(pixel, y, x);
+                gridPane.add(pixel, y, x);
+                index++;
             }
         }
     }

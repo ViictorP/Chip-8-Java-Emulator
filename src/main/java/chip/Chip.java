@@ -44,6 +44,12 @@ public class Chip {
         keys = new byte[16];
 
         display = new byte[64 * 32];
+
+        display[0] = 1;
+        display[32] = 1;
+        display[64] = 1;
+        display[44] = 1;
+
     }
 
     public void run() {
