@@ -1,5 +1,9 @@
 package chip;
 
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 public class Chip {
 
     // char[] memory representa o memória do chip, 4kB / 4096 de memória 8-bits.
@@ -53,29 +57,52 @@ public class Chip {
     public void run() {
         //fetch Opcode
         char opcode = (char)((memory[pc] << 8) | memory[pc + 1]);
-        //System.out.print(Integer.toBinaryString(opcode) + ": ");
+        System.out.print(Integer.toHexString(opcode) + ": ");
 
         //decode Opcode
-
         switch (opcode & 0xF000) {
 
-            case 0x8000:    // contém mais informação nos 4 ultimos bits ou nibble
+            case 0x1000:
+                break;
+
+            case 0x2000: // Opcode: 2NNN, Type: Call, Calls subroutine at NNN.
+                char address = (char)(opcode & 0x0FFF);
+                stack[stackPointer] = pc;
+                stackPointer++;
+                pc = address;
+                break;
+
+            case 0x3000:
+                break;
+
+            case 0x6000:
+                int x = (opcode & 0x0F00);
+                V[x] = (char)(opcode & 0x00FF);
+                pc += 2;
+                break;
+
+
+            case 0x7000:
+                break;
+
+            case 0x8000:
 
                 switch (opcode & 0x000F) {
 
-                    case 0x0000: // 8XY0 Sets VX to the value of VY.
+                    case 0x0000:
+                        break;
 
-                        default:
-                            //System.err.println("OPCODE Não suportado");
-                            //System.exit(0);
+                    default:
+                        System.err.println("Opcode não suportado");
+                        System.exit(0);
                         break;
                 }
 
                 break;
 
             default:
-                //System.err.println("OPCODE Não suportado");
-                //System.exit(0);
+                System.err.println("Opcode não suportado");
+                System.exit(0);
                 break;
         }
 
@@ -85,12 +112,26 @@ public class Chip {
         return display;
     }
 
-    public void test() {
-        display[(int) (Math.random() * (64))][(int) (Math.random() * (32))] = 1;
-    }
+    public void gameLoader(String file) {
+        DataInputStream dataInputStream = null;
+        try {
+            dataInputStream = new DataInputStream(new FileInputStream(file));
 
-    public void loadProgram(String file) {
-
+            int offset = 0;
+            while(dataInputStream.available() > 0) {
+                memory[0x200 + offset] = (char) (dataInputStream.readByte() & 0xFF);
+                offset++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(0);
+        } finally {
+            if (dataInputStream != null) {
+                try {
+                    dataInputStream.close();
+                } catch (IOException exception) { }
+            }
+        }
     }
 
     public boolean needsRedraw() {

@@ -21,7 +21,7 @@ public class Main extends Application {
     private void initialize() {
         chip = new Chip();
         chip.init();
-        chip.loadProgram("./pong2.c8");
+        chip.gameLoader("src/main/resources/games/pong2.c8");
         screen = new Screen(chip);
 
         stage.setTitle("Chip-8 Emulator");
