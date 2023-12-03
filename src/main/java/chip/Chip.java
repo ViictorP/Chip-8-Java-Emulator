@@ -26,7 +26,7 @@ public class Chip {
     private byte[] keys;
 
     // Representa os pixels da dela monocromatica.
-    private byte[] display;
+    private byte[][] display;
 
     // Reseta a memória e os ponteiros do Chip-8
     public void init() {
@@ -43,13 +43,7 @@ public class Chip {
 
         keys = new byte[16];
 
-        display = new byte[64 * 32];
-
-        display[0] = 1;
-        display[32] = 1;
-        display[64] = 1;
-        display[44] = 1;
-
+        display = new byte[64][32];
     }
 
     public void run() {
@@ -83,7 +77,11 @@ public class Chip {
 
     }
 
-    public byte[] getDisplay() {
+    public byte[][] getDisplay() {
         return display;
+    }
+
+    public void test() {
+        display[(int) (Math.random() * (64-1 +1))][(int) (Math.random() * (32-1 +1))] = 1;
     }
 }
