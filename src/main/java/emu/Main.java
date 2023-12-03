@@ -5,13 +5,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.awt.*;
 
 public class Main extends Application {
 
@@ -21,38 +17,31 @@ public class Main extends Application {
     private Screen screen;
     private Chip chip;
 
-    private int countTest = 0;
-
 
     private void initialize() {
-        stage.setTitle("Chip-8 Emulator");
-
         chip = new Chip();
         chip.init();
+        chip.loadProgram("./pong2.c8");
+        screen = new Screen(chip);
 
+        stage.setTitle("Chip-8 Emulator");
         StackPane stackPane = new StackPane();
-        screen = new Screen(chip.getDisplay());
         stackPane.getChildren().add(screen);
         Scene scene = new Scene(stackPane);
         stage.setScene(scene);
-
-
 
         loop = new Timeline();
         loop.setCycleCount(Timeline.INDEFINITE);
 
         KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.003), actionEvent -> {
             try {
-                //chip.run();
-            } catch (RuntimeException e) {
-                loop.stop();
-            }
+                chip.run();
 
-            if (countTest < 2048) {
-                chip.test();
-                screen.refresh();
-                countTest++;
-            } else {
+                if (chip.needsRedraw()) {
+                    screen.refresh();
+                    chip.removeDrawFlag();
+                }
+            } catch (RuntimeException e) {
                 loop.stop();
             }
         });

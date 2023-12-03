@@ -28,6 +28,8 @@ public class Chip {
     // Representa os pixels da dela monocromatica.
     private byte[][] display;
 
+    private boolean needRedraw;
+
     // Reseta a memória e os ponteiros do Chip-8
     public void init() {
         memory = new char[4096];
@@ -44,12 +46,14 @@ public class Chip {
         keys = new byte[16];
 
         display = new byte[64][32];
+
+        needRedraw = false;
     }
 
     public void run() {
         //fetch Opcode
         char opcode = (char)((memory[pc] << 8) | memory[pc + 1]);
-        System.out.print(Integer.toBinaryString(opcode) + ": ");
+        //System.out.print(Integer.toBinaryString(opcode) + ": ");
 
         //decode Opcode
 
@@ -62,16 +66,16 @@ public class Chip {
                     case 0x0000: // 8XY0 Sets VX to the value of VY.
 
                         default:
-                            System.err.println("OPCODE Não suportado");
-                            System.exit(0);
+                            //System.err.println("OPCODE Não suportado");
+                            //System.exit(0);
                         break;
                 }
 
                 break;
 
             default:
-                System.err.println("OPCODE Não suportado");
-                System.exit(0);
+                //System.err.println("OPCODE Não suportado");
+                //System.exit(0);
                 break;
         }
 
@@ -82,6 +86,18 @@ public class Chip {
     }
 
     public void test() {
-        display[(int) (Math.random() * (64-1 +1))][(int) (Math.random() * (32-1 +1))] = 1;
+        display[(int) (Math.random() * (64))][(int) (Math.random() * (32))] = 1;
+    }
+
+    public void loadProgram(String file) {
+
+    }
+
+    public boolean needsRedraw() {
+        return needRedraw;
+    }
+
+    public void removeDrawFlag() {
+        needRedraw = false;
     }
 }

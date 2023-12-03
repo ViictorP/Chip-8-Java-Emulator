@@ -1,5 +1,6 @@
 package emu;
 
+import chip.Chip;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -11,11 +12,13 @@ public class Screen extends Canvas {
     private static final int HEIGHT = 32;
 
     private GraphicsContext graphicsContext;
+    private Chip chip;
     private byte[][] display;
 
-    public Screen(byte[][] display) {
+    public Screen(Chip chip) {
         super(640, 320);
-        this.display = display;
+        this.chip = chip;
+        this.display = chip.getDisplay();
 
         graphicsContext = this.getGraphicsContext2D();
         graphicsContext.setFill(Color.BLACK);
