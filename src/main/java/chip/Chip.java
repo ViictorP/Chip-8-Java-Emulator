@@ -59,13 +59,41 @@ public class Chip {
     public void run() {
         //fetch Opcode
         char opcode = (char)((memory[pc] << 8) | memory[pc + 1]);
-        System.out.print(Integer.toHexString(opcode) + ": ");
+        System.out.print(Integer.toHexString(opcode).toUpperCase() + ": ");
 
         //decode Opcode
         switch (opcode & 0xF000) {
 
+            case 0x0000: {
+
+                switch (opcode & 0x00FF) {
+
+                    case 0x00E0: // Opcode: 00E0, Type: Display, Clears the screen.
+
+                        System.err.println("Opcode não suportado");
+                        System.exit(0);
+
+                        break;
+
+                    case 0x00EE: // Opcode: 00EE, Type: Flow, Returns from a subroutine.
+                        stackPointer--;
+                        pc = (char) (stack[stackPointer] + 2);
+                        System.out.println("Return from a subroutine to " + Integer.toHexString(pc).toUpperCase());
+                        break;
+
+                    default: // Opcode: 0NNN, Type: Call, Calls machine code routine (RCA 1802 for COSMAC VIP) at address NNN. Not necessary for most ROMs.
+                        System.err.println("Opcode não suportado");
+                        System.exit(0);
+                        break;
+
+                }
+
+                break;
+            }
+
             case 0x1000: { // Opcode: 1NNN, Type: Flow, Jumps to address NNN.
                 pc = (char) (opcode & 0x0FFF);
+                System.out.println("Jump to address " + Integer.toHexString(pc).toUpperCase());
                 break;
             }
 
@@ -73,6 +101,7 @@ public class Chip {
                 stack[stackPointer] = pc;
                 stackPointer++;
                 pc = (char) (opcode & 0x0FFF);
+                System.out.println("Calling " + Integer.toHexString(pc).toUpperCase());
                 break;
             }
 
@@ -81,16 +110,20 @@ public class Chip {
                 int NN = (opcode & 0x00FF);
                 if (V[x] == NN) {
                     pc += 4;
+                    System.out.println("Skipping instruction (V[" + x + "] == " + NN + ")");
                 } else {
                     pc += 2;
+                    System.out.println("Not skipping instruction (V[" + x + "] != " + NN + ")");
                 }
                 break;
             }
 
             case 0x6000: { // Opcode: 6XNN, Type: Const, Sets VX to NN.
                 int x = (opcode & 0x0F00) >> 8;
-                V[x] = (char)(opcode & 0x00FF);
+                int NN = (char)(opcode & 0x00FF);
+                V[x] = (char) NN;
                 pc += 2;
+                System.out.println("Setting V[" + x + "] to " + (int)V[x]);
                 break;
             }
 
@@ -100,6 +133,7 @@ public class Chip {
                 int NN = (opcode & 0x00FF);
                 V[x] = (char) ((V[x] + NN) & 0xFF);
                 pc += 2;
+                System.out.println("Add " + NN + " to V[" + x + "] = " + (int)V[x]);
                 break;
             }
 
@@ -110,7 +144,7 @@ public class Chip {
                     case 0x0000:
                     default:
                         System.err.println("Opcode não suportado");
-                        //System.exit(0);
+                        System.exit(0);
                         break;
                 }
 
@@ -119,6 +153,7 @@ public class Chip {
             case 0xA000: { // Opcode: ANNN, Type: MEM, Sets I to the address NNN.
                 I = (char)(opcode & 0x0FFF);
                 pc += 2;
+                System.out.println("Set I to " + Integer.toHexString(I).toUpperCase());
                 break;
             }
 
@@ -150,12 +185,14 @@ public class Chip {
                 }
                 pc += 2;
                 needRedraw = true;
+                System.out.println("Drawing at V[" + ((opcode & 0x0F00) >> 8) + "] = "
+                        + x + ", V[" + ((opcode & 0x00F0) >> 4) + "] = " + y);
                 break;
             }
 
             default: {
                 System.err.println("Opcode não suportado");
-                //System.exit(0);
+                System.exit(0);
             }
         }
 
