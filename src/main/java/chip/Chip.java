@@ -164,7 +164,7 @@ public class Chip {
     public void fontLoader() {
         int offset = 0;
         while(offset < ChipFonts.fontset.length) {
-            memory[0x50 + offset] = (char) ChipFonts.fontset[offset];
+            memory[0x50 + offset] = (char)(ChipFonts.fontset[offset] & 0xFF);
             offset++;
         }
     }
