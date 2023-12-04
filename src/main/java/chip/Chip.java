@@ -52,6 +52,8 @@ public class Chip {
         display = new byte[64][32];
 
         needRedraw = false;
+
+        fontLoader();
     }
 
     public void run() {
@@ -60,11 +62,13 @@ public class Chip {
         System.out.print(Integer.toHexString(opcode) + ": ");
 
         //decode Opcode
-        int x = 0;
+        int x;
+        int NN;
 
         switch (opcode & 0xF000) {
 
-            case 0x1000:
+            case 0x1000: // Opcode: 1NNN, Type: Flow, Jumps to address NNN.
+                pc = (char)(opcode & 0x0FFF);
                 break;
 
             case 0x2000: // Opcode: 2NNN, Type: Call, Calls subroutine at NNN.
@@ -73,7 +77,14 @@ public class Chip {
                 pc = (char)(opcode & 0x0FFF);
                 break;
 
-            case 0x3000:
+            case 0x3000: // Opcode: 3XNN, Type: Cond, Skips the next instruction if VX equals NN (usually the next instruction is a jump to skip a code block).
+                x = (opcode & 0x0F00) >> 8;
+                NN = (opcode & 0x00FF);
+                if (V[x] == NN) {
+                    pc += 4;
+                } else {
+                    pc += 2;
+                }
                 break;
 
             case 0x6000: // Opcode: 6XNN, Type: Const, Sets VX to NN.
@@ -85,7 +96,7 @@ public class Chip {
 
             case 0x7000: // Opcode: 7XNN, Type: Const, Adds NN to VX (carry flag is not changed).
                 x = (opcode & 0x0F00) >> 8;
-                int NN = (opcode & 0x00FF);
+                NN = (opcode & 0x00FF);
                 V[x] = (char)((V[x] + NN) & 0xFF);
                 pc += 2;
                 break;
@@ -147,6 +158,14 @@ public class Chip {
                     dataInputStream.close();
                 } catch (IOException exception) { }
             }
+        }
+    }
+
+    public void fontLoader() {
+        int offset = 0;
+        while(offset < ChipFonts.fontset.length) {
+            memory[0x50 + offset] = (char) ChipFonts.fontset[offset];
+            offset++;
         }
     }
 
