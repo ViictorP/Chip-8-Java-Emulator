@@ -30,7 +30,7 @@ public class Chip {
     private byte[] keys;
 
     // Representa os pixels da dela monocromatica.
-    private byte[][] display;
+    private byte[] display;
 
     private boolean needRedraw;
 
@@ -49,7 +49,7 @@ public class Chip {
 
         keys = new byte[16];
 
-        display = new byte[64][32];
+        display = new byte[64 * 32];
 
         needRedraw = false;
 
@@ -62,80 +62,106 @@ public class Chip {
         System.out.print(Integer.toHexString(opcode) + ": ");
 
         //decode Opcode
-        int x;
-        int NN;
-
         switch (opcode & 0xF000) {
 
-            case 0x1000: // Opcode: 1NNN, Type: Flow, Jumps to address NNN.
-                pc = (char)(opcode & 0x0FFF);
+            case 0x1000: { // Opcode: 1NNN, Type: Flow, Jumps to address NNN.
+                pc = (char) (opcode & 0x0FFF);
                 break;
+            }
 
-            case 0x2000: // Opcode: 2NNN, Type: Call, Calls subroutine at NNN.
+            case 0x2000: { // Opcode: 2NNN, Type: Call, Calls subroutine at NNN.
                 stack[stackPointer] = pc;
                 stackPointer++;
-                pc = (char)(opcode & 0x0FFF);
+                pc = (char) (opcode & 0x0FFF);
                 break;
+            }
 
-            case 0x3000: // Opcode: 3XNN, Type: Cond, Skips the next instruction if VX equals NN (usually the next instruction is a jump to skip a code block).
-                x = (opcode & 0x0F00) >> 8;
-                NN = (opcode & 0x00FF);
+            case 0x3000: { // Opcode: 3XNN, Type: Cond, Skips the next instruction if VX equals NN (usually the next instruction is a jump to skip a code block).
+                int x = (opcode & 0x0F00) >> 8;
+                int NN = (opcode & 0x00FF);
                 if (V[x] == NN) {
                     pc += 4;
                 } else {
                     pc += 2;
                 }
                 break;
+            }
 
-            case 0x6000: // Opcode: 6XNN, Type: Const, Sets VX to NN.
-                x = (opcode & 0x0F00) >> 8;
+            case 0x6000: { // Opcode: 6XNN, Type: Const, Sets VX to NN.
+                int x = (opcode & 0x0F00) >> 8;
                 V[x] = (char)(opcode & 0x00FF);
                 pc += 2;
                 break;
+            }
 
 
-            case 0x7000: // Opcode: 7XNN, Type: Const, Adds NN to VX (carry flag is not changed).
-                x = (opcode & 0x0F00) >> 8;
-                NN = (opcode & 0x00FF);
-                V[x] = (char)((V[x] + NN) & 0xFF);
+            case 0x7000: { // Opcode: 7XNN, Type: Const, Adds NN to VX (carry flag is not changed).
+                int x = (opcode & 0x0F00) >> 8;
+                int NN = (opcode & 0x00FF);
+                V[x] = (char) ((V[x] + NN) & 0xFF);
                 pc += 2;
                 break;
+            }
 
             case 0x8000:
 
                 switch (opcode & 0x000F) {
 
                     case 0x0000:
-                        break;
-
                     default:
                         System.err.println("Opcode não suportado");
-                        System.exit(0);
+                        //System.exit(0);
                         break;
                 }
 
                 break;
 
-            case 0xA000: // Opcode: ANNN, Type: MEM, Sets I to the address NNN.
-                I = (char) (opcode & 0x0FFF);
+            case 0xA000: { // Opcode: ANNN, Type: MEM, Sets I to the address NNN.
+                I = (char)(opcode & 0x0FFF);
                 pc += 2;
                 break;
+            }
 
-            case 0xD000: // Opcode: DXYN, Type: Display, Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
+            case 0xD000: { // Opcode: DXYN, Type: Display, Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
 
-                // TODO: Display intruction
+                int x = V[(opcode & 0x0F00) >> 8];
+                int y = V[(opcode & 0x00F0) >> 4];
+                int height = (opcode & 0x000F);
+
+                // collisionFlag
+                V[0xF] = 0;
+
+                for (int _Y = 0; _Y < height; _Y++) {
+                    int line = memory[I + _Y];
+
+                    for (int _X = 0; _X < 8; _X++) {
+                        int pixel = line & (0x80 >> _X);
+                        if (pixel != 0) {
+
+                            int totalX = x + _X;
+                            int totalY = y + _Y;
+                            int index = totalY * 64 + totalX;
+
+                            if (display[index] == 1) V[0xF] = 1;
+
+                            display[index] ^= 1;
+                        }
+                    }
+                }
                 pc += 2;
+                needRedraw = true;
                 break;
+            }
 
-            default:
+            default: {
                 System.err.println("Opcode não suportado");
-                System.exit(0);
-                break;
+                //System.exit(0);
+            }
         }
 
     }
 
-    public byte[][] getDisplay() {
+    public byte[] getDisplay() {
         return display;
     }
 
