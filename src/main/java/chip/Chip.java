@@ -60,29 +60,34 @@ public class Chip {
         System.out.print(Integer.toHexString(opcode) + ": ");
 
         //decode Opcode
+        int x = 0;
+
         switch (opcode & 0xF000) {
 
             case 0x1000:
                 break;
 
             case 0x2000: // Opcode: 2NNN, Type: Call, Calls subroutine at NNN.
-                char address = (char)(opcode & 0x0FFF);
                 stack[stackPointer] = pc;
                 stackPointer++;
-                pc = address;
+                pc = (char)(opcode & 0x0FFF);
                 break;
 
             case 0x3000:
                 break;
 
-            case 0x6000:
-                int x = (opcode & 0x0F00);
+            case 0x6000: // Opcode: 6XNN, Type: Const, Sets VX to NN.
+                x = (opcode & 0x0F00) >> 8;
                 V[x] = (char)(opcode & 0x00FF);
                 pc += 2;
                 break;
 
 
-            case 0x7000:
+            case 0x7000: // Opcode: 7XNN, Type: Const, Adds NN to VX (carry flag is not changed).
+                x = (opcode & 0x0F00) >> 8;
+                int NN = (opcode & 0x00FF);
+                V[x] = (char)((V[x] + NN) & 0xFF);
+                pc += 2;
                 break;
 
             case 0x8000:
@@ -98,6 +103,17 @@ public class Chip {
                         break;
                 }
 
+                break;
+
+            case 0xA000: // Opcode: ANNN, Type: MEM, Sets I to the address NNN.
+                I = (char) (opcode & 0x0FFF);
+                pc += 2;
+                break;
+
+            case 0xD000: // Opcode: DXYN, Type: Display, Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
+
+                // TODO: Display intruction
+                pc += 2;
                 break;
 
             default:
