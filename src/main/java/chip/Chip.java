@@ -190,12 +190,41 @@ public class Chip {
                 break;
             }
 
+            case 0xF000: {
+
+                switch (opcode & 0x00FF) {
+
+                    case 0x0033: { // Opcode: FX33, Type: BCD, Stores the binary-coded decimal representation of VX, with the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
+                        int address = (opcode & 0x0F00) >> 8;
+                        int x = V[address];
+
+                        int hundred = (x / 100);
+                        int ten = ((x % 100) / 10);
+                        int unit = ((x % 100) % 10);
+
+                        memory[I] = (char) hundred;
+                        memory[I + 1] = (char) ten;
+                        memory[I + 2] = (char) unit;
+
+                        System.out.println("Storing Binary-Coded Decimal V[" + address + "] = " + (int)(V[(opcode & 0x0F00) >> 8]) + " as {" + hundred + ", " + ten + ", " + unit + "}");
+                        pc += 2;
+                        break;
+                    }
+
+                    default: {
+                        System.err.println("Opcode não suportado");
+                        System.exit(0);
+                    }
+                    break;
+                }
+                break;
+            }
+
             default: {
                 System.err.println("Opcode não suportado");
                 System.exit(0);
             }
         }
-
     }
 
     public byte[] getDisplay() {
