@@ -194,6 +194,23 @@ public class Chip {
 
                 switch (opcode & 0x00FF) {
 
+                    case 0x0015: { // Opcode: FX15, Timer: MEM, Sets the delay timer to VX.
+
+                        System.err.println("Opcode não suportado");
+                        System.exit(0);
+
+                        break;
+                    }
+
+                    case 0x0029: { // Opcode: FX29, Type: MEM, Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
+                        int x = (opcode & 0x0F00) >> 8;
+                        int character = V[x];
+                        I = (char) (0x050 + (character * 5));
+                        System.out.println("Setting I to Character V[" + x + "] = " + (int)V[x] + " Offset to 0x" + Integer.toHexString(I).toUpperCase());
+                        pc += 2;
+                        break;
+                    }
+
                     case 0x0033: { // Opcode: FX33, Type: BCD, Stores the binary-coded decimal representation of VX, with the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
                         int address = (opcode & 0x0F00) >> 8;
                         int x = V[address];
@@ -207,6 +224,16 @@ public class Chip {
                         memory[I + 2] = (char) unit;
 
                         System.out.println("Storing Binary-Coded Decimal V[" + address + "] = " + (int)(V[(opcode & 0x0F00) >> 8]) + " as {" + hundred + ", " + ten + ", " + unit + "}");
+                        pc += 2;
+                        break;
+                    }
+
+                    case 0x0065: { // Opcode: FX65, Type: MEM, Fills from V0 to VX (including VX) with values from memory, starting at address I. The offset from I is increased by 1 for each value read, but I itself is left unmodified.
+                        int x = (opcode & 0x0F00) >> 8;
+                        for (int i = 0; i < x ; i++) {
+                            V[i] = memory[I + i];
+                        }
+                        System.out.println("Setting V[0] to V[" + x + "] to the values of merory[0x" + Integer.toHexString(I & 0xFFFF).toUpperCase() + "]");
                         pc += 2;
                         break;
                     }
