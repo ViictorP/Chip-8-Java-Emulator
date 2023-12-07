@@ -143,7 +143,33 @@ public class Chip {
 
                 switch (opcode & 0x000F) {
 
-                    case 0x0000:
+                    case 0x0002: { // Opcode: 8XY2, Type: BitOp, Sets VX to VX and VY. (bitwise AND operation)
+                        int x = (opcode & 0x0F00) >> 8;
+                        int y = (opcode & 0x00F0) >> 4;
+                        System.out.println("Set V[" + x + "] to the bitwise AND operation between V[" + x + "] = " + (int)V[x] + " & V[" + y + "] = " + (int)V[y] + ", which is " + (V[x] & V[y]));
+                        V[x] = (char) (V[x] & V[y]);
+
+                        pc += 2;
+
+                        break;
+                    }
+
+                    case 0x0004: { // Opcode: 8XY4, Type: Math, Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there is not.
+                        int x = (opcode & 0x0F00) >> 8;
+                        int y = (opcode & 0x00F0) >> 4;
+                        System.out.print("Adding V[" + x + "] = " + (int)V[x]  + " to V[" + y + "] = " + (int)V[y]  + ", which is " + ((V[x] + V[y]) & 0xFF));
+                        if (V[y] > 255 - V[x]) {
+                            V[0xF] = 1;
+                        } else {
+                            V[0xF] = 0;
+                        }
+                        System.out.println(", is Carry needed? " + (int)V[0xF]);
+
+                        V[x] = (char) ((V[x] + V[y]) & 0xFF);
+                        pc += 2;
+                        break;
+                    }
+
                     default:
                         System.err.println("Opcode não suportado");
                         System.exit(0);
