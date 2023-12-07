@@ -1,5 +1,8 @@
 package chip;
 
+import emu.Keyboard;
+import emu.Screen;
+
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,13 +29,16 @@ public class Chip {
     // Timer usado para fazer sons.
     private int sound_timer;
 
-    // byte[] keys resenta os teclas do teclado.
-    private byte[] keys;
+    private Screen screen;
 
-    // Representa os pixels da dela monocromatica.
-    private byte[] display;
+    private Keyboard keyboard;
 
     private boolean needRedraw;
+
+    public Chip(Screen screen, Keyboard keyboard) {
+        this.screen = screen;
+        this.keyboard = keyboard;
+    }
 
     // Reseta a memória e os ponteiros do Chip-8
     public void init() {
@@ -46,10 +52,6 @@ public class Chip {
 
         delay_timer = 0;
         sound_timer = 0;
-
-        keys = new byte[16];
-
-        display = new byte[64 * 32];
 
         needRedraw = false;
 
@@ -157,8 +159,18 @@ public class Chip {
                 break;
             }
 
-            case 0xD000: { // Opcode: DXYN, Type: Display, Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
+            case 0xC000: { // Opcode: CXNN, Type: Rand, Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
+                int x = (opcode & 0x0F00) >> 8;
+                int nn = (opcode & 0x00FF);
+                int random = (int)(Math.random() * 256);  // 0 to 255
+                V[x] = (char) (random & nn);
+                pc += 2;
+                System.out.println("V[" + x + "] has been set to a random number = " + random);
+                break;
+            }
 
+            case 0xD000: { // Opcode: DXYN, Type: Display, Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
+                byte[] display = screen.getDisplay();
                 int x = V[(opcode & 0x0F00) >> 8];
                 int y = V[(opcode & 0x00F0) >> 4];
                 int height = (opcode & 0x000F);
@@ -190,16 +202,58 @@ public class Chip {
                 break;
             }
 
+            case 0xE000:
+                switch (opcode & 0x00FF) {
+
+                    case 0x009E: { // Opcode: EX9E, Type: KeyOp, Skips the next instruction if the key stored in VX is pressed (usually the next instruction is a jump to skip a code block).
+
+                        int x = (opcode & 0x0F00) >> 8;
+                        if (keyboard.isPressed(V[x])) {
+                            pc += 4;
+                        } else {
+                            pc += 2;
+                        }
+                        System.out.println("Key " + (int)V[x]);
+                        break;
+                    }
+
+                    case 0x00A1: { // Opcode: EXA1, Type: KeyOp, Skips the next instruction if the key stored in VX is not pressed (usually the next instruction is a jump to skip a code block).
+
+                        int x = (opcode & 0x0F00) >> 8;
+                        if (!keyboard.isPressed(V[x])) {
+                            pc += 4;
+                        } else {
+                            pc += 2;
+                        }
+                        System.out.println("Key " + (int)V[x]);
+                        break;
+                    }
+
+                    default: {
+                        System.err.println("Opcode não suportado");
+                        System.exit(0);
+                    }
+                }
+                break;
+
             case 0xF000: {
 
                 switch (opcode & 0x00FF) {
 
+                    case 0x0007: { // Opcode: FX15, Timer: MEM, Sets the delay timer to VX.
+                        int x = (opcode & 0x0F00) >> 8;
+                        V[x] = (char) delay_timer;
+                        pc += 2;
+                        System.out.println("Setting V[" + (int)V[x] + "]" + " to delay_timer");
+                        //break;
+                    }
+
                     case 0x0015: { // Opcode: FX15, Timer: MEM, Sets the delay timer to VX.
-
-                        System.err.println("Opcode não suportado");
-                        System.exit(0);
-
-                        break;
+                        int x = (opcode & 0x0F00) >> 8;
+                        delay_timer = V[x];
+                        pc += 2;
+                        System.out.println("Setting delay_timer to V[" + (int)V[x] + "]");
+                        //break;
                     }
 
                     case 0x0029: { // Opcode: FX29, Type: MEM, Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
@@ -252,10 +306,6 @@ public class Chip {
                 System.exit(0);
             }
         }
-    }
-
-    public byte[] getDisplay() {
-        return display;
     }
 
     public void gameLoader(String file) {

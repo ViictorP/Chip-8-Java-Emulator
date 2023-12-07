@@ -4,7 +4,9 @@ import chip.Chip;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -16,18 +18,24 @@ public class Main extends Application {
 
     private Screen screen;
     private Chip chip;
+    private Keyboard keyboard;
 
 
     private void initialize() {
-        chip = new Chip();
+        screen = new Screen();
+        keyboard = new Keyboard();
+        chip = new Chip(screen, keyboard);
         chip.init();
         chip.gameLoader("src/main/resources/games/pong2.c8");
-        screen = new Screen(chip);
 
         stage.setTitle("Chip-8 Emulator");
         StackPane stackPane = new StackPane();
         stackPane.getChildren().add(screen);
         Scene scene = new Scene(stackPane);
+
+        scene.setOnKeyPressed(e -> keyboard.setKeysPressed(e.getCode()));
+        scene.setOnKeyReleased(e -> keyboard.setKeysUnpressed(e.getCode()));
+
         stage.setScene(scene);
 
         loop = new Timeline();
@@ -36,7 +44,6 @@ public class Main extends Application {
         KeyFrame keyFrame = new KeyFrame(Duration.seconds(0.003), actionEvent -> {
             try {
                 chip.run();
-
                 if (chip.needsRedraw()) {
                     screen.refresh();
                     chip.removeDrawFlag();

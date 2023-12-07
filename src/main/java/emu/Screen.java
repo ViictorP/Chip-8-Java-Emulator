@@ -10,13 +10,13 @@ public class Screen extends Canvas {
     private static final int PIXEL_SIZE = 10;
 
     private GraphicsContext graphicsContext;
-    private Chip chip;
+
+    // Representa os pixels da dela monocromatica.
     private byte[] display;
 
-    public Screen(Chip chip) {
+    public Screen() {
         super(640, 320);
-        this.chip = chip;
-        this.display = chip.getDisplay();
+        display = new byte[64 * 32];
 
         graphicsContext = this.getGraphicsContext2D();
         graphicsContext.setFill(Color.BLACK);
@@ -36,5 +36,9 @@ public class Screen extends Canvas {
 
             graphicsContext.fillRect(x*PIXEL_SIZE, (y*PIXEL_SIZE), PIXEL_SIZE, PIXEL_SIZE);
         }
+    }
+
+    public byte[] getDisplay() {
+        return display;
     }
 }
