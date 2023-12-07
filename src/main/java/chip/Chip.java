@@ -120,6 +120,20 @@ public class Chip {
                 break;
             }
 
+            case 0x4000: { // Opcode: 4XNN, Type: Cond, Skips the next instruction if VX does not equal NN (usually the next instruction is a jump to skip a code block).
+
+                int x = (opcode & 0x0F00) >> 8;
+                int nn = opcode & 0x00FF;
+
+                if (V[x] != nn) {
+                    pc += 4;
+                } else {
+                    pc += 2;
+                }
+
+                break;
+            }
+
             case 0x6000: { // Opcode: 6XNN, Type: Const, Sets VX to NN.
                 int x = (opcode & 0x0F00) >> 8;
                 int NN = (char)(opcode & 0x00FF);
