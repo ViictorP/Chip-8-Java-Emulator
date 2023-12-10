@@ -255,9 +255,12 @@ public class Chip {
 
                             int totalX = x + _X;
                             int totalY = y + _Y;
-                            int index = totalY * 64 + totalX;
+                            int index = 0;
 
-                            if (display[index] == 1) V[0xF] = 1;
+                            if (totalX < 64 && totalY < 32) {
+                                index = totalY * 64 + totalX;
+                                if (display[index] == 1) V[0xF] = 1;
+                            }
 
                             display[index] ^= 1;
                         }
@@ -360,7 +363,7 @@ public class Chip {
 
                     case 0x0065: { // Opcode: FX65, Type: MEM, Fills from V0 to VX (including VX) with values from memory, starting at address I. The offset from I is increased by 1 for each value read, but I itself is left unmodified.
                         int x = (opcode & 0x0F00) >> 8;
-                        for (int i = 0; i < x ; i++) {
+                        for (int i = 0; i <= x ; i++) {
                             V[i] = memory[I + i];
                         }
                         System.out.println("Setting V[0] to V[" + x + "] to the values of merory[0x" + Integer.toHexString(I & 0xFFFF).toUpperCase() + "]");
