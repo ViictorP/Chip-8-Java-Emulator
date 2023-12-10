@@ -157,6 +157,18 @@ public class Chip {
 
                 switch (opcode & 0x000F) {
 
+                    case 0x0000: { // Opcode: 8XY0, Type: Assig, 	Sets VX to the value of VY.
+                        int x = (opcode & 0x0F00) >> 8;
+                        int y = (opcode & 0x00F0) >> 4;
+
+                        System.out.println("Setting V[x] = " + (int)V[x] + " to (int)V[y] = " + (int)V[y]);
+
+                        V[x] = V[y];
+
+                        pc += 2;
+                        break;
+                    }
+
                     case 0x0002: { // Opcode: 8XY2, Type: BitOp, Sets VX to VX and VY. (bitwise AND operation)
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
@@ -180,6 +192,22 @@ public class Chip {
                         System.out.println(", is Carry needed? " + (int)V[0xF]);
 
                         V[x] = (char) ((V[x] + V[y]) & 0xFF);
+                        pc += 2;
+                        break;
+                    }
+
+                    case 0x0005: { // Opcode: 8XY5, Type: Math, VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there is not.
+                        int x = (opcode & 0x0F00) >> 8;
+                        int y = (opcode & 0x00F0) >> 4;
+                        System.out.print("Subtracting V[" + y + "]  = " + (int)V[y]  + " from V[" + x + "] = " + (int)V[x]  + ", which is " + (V[y] + V[x]));
+                        if (V[y] > V[x]) {
+                            V[0xF] = 0;
+                        } else {
+                            V[0xF] = 1;
+                        }
+                        System.out.println(", Borrow (yes 0 / not 1)  :  " + (int)V[0xF]);
+
+                        V[x] = (char) ((V[x] - V[y]) & 0xFF);
                         pc += 2;
                         break;
                     }
@@ -328,6 +356,7 @@ public class Chip {
                             V[i] = memory[I + i];
                         }
                         System.out.println("Setting V[0] to V[" + x + "] to the values of merory[0x" + Integer.toHexString(I & 0xFFFF).toUpperCase() + "]");
+                        I = (char) (I + x + 1);
                         pc += 2;
                         break;
                     }
