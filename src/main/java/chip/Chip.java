@@ -313,7 +313,7 @@ public class Chip {
                         V[x] = (char) delay_timer;
                         pc += 2;
                         System.out.println("Setting V[" + (int)V[x] + "]" + " to delay_timer");
-                        //break;
+                        break;
                     }
 
                     case 0x0015: { // Opcode: FX15, Timer: MEM, Sets the delay timer to VX.
@@ -321,7 +321,15 @@ public class Chip {
                         delay_timer = V[x];
                         pc += 2;
                         System.out.println("Setting delay_timer to V[" + (int)V[x] + "]");
-                        //break;
+                        break;
+                    }
+
+                    case 0x0018: { // Opcode: FX18, Timer: Sound, Sets the sound timer to VX.
+                        int x = (opcode & 0x0F00) >> 8;
+                        sound_timer = V[x];
+                        pc += 2;
+                        System.out.println("Setting sound_timer to V[" + (int)V[x] + "]");
+                        break;
                     }
 
                     case 0x0029: { // Opcode: FX29, Type: MEM, Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
@@ -375,6 +383,9 @@ public class Chip {
                 System.exit(0);
             }
         }
+
+        if (sound_timer > 0) sound_timer--;
+        if (delay_timer > 0) delay_timer--;
     }
 
     public void gameLoader(String file) {
