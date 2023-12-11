@@ -123,7 +123,6 @@ public class Chip {
             }
 
             case 0x4000: { // Opcode: 4XNN, Type: Cond, Skips the next instruction if VX does not equal NN (usually the next instruction is a jump to skip a code block).
-
                 int x = (opcode & 0x0F00) >> 8;
                 int nn = opcode & 0x00FF;
 
@@ -132,7 +131,6 @@ public class Chip {
                 } else {
                     pc += 2;
                 }
-
                 break;
             }
 
@@ -179,6 +177,16 @@ public class Chip {
 
                         pc += 2;
 
+                        break;
+                    }
+
+                    case 0x0003: { // Opcode: 8XY3, Type: BitOp, Sets VX to VX xor VY.
+                        int x = (opcode & 0x0F00) >> 8;
+                        int y = (opcode & 0x00F0) >> 4;
+                        System.out.println("Set V[" + x + "] to the bitwise XOR operation between V[" + x + "] = " + (int)V[x] + " & V[" + y + "] = " + (int)V[y] + ", which is " + (V[x] ^ V[y]));
+
+                        V[x] = (char) (V[x] ^ V[y]);
+                        pc += 2;
                         break;
                     }
 
@@ -372,14 +380,40 @@ public class Chip {
                         break;
                     }
 
+                    case 0x0055: { // Opcode: FX55, Timer: MEM, Stores from V0 to VX (including VX) in memory, starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
+                        int x = (opcode & 0x0F00) >> 8;
+
+                        for (int i = 0; i <= x; i++) {
+                            memory[I + i] = V[i];
+                        }
+                        System.out.println("Setting Memory[" + Integer.toHexString(I & 0xFFFF).toUpperCase() + " + n] = V[0] to V[x]");
+                        pc += 2;
+                        break;
+                    }
+
                     case 0x0065: { // Opcode: FX65, Type: MEM, Fills from V0 to VX (including VX) with values from memory, starting at address I. The offset from I is increased by 1 for each value read, but I itself is left unmodified.
                         int x = (opcode & 0x0F00) >> 8;
                         for (int i = 0; i <= x ; i++) {
                             V[i] = memory[I + i];
                         }
-                        System.out.println("Setting V[0] to V[" + x + "] to the values of merory[0x" + Integer.toHexString(I & 0xFFFF).toUpperCase() + "]");
-                        I = (char) (I + x + 1);
+                        System.out.println("Setting V[0] to V[" + x + "] to the values of memory[0x" + Integer.toHexString(I & 0xFFFF).toUpperCase() + "]");
                         pc += 2;
+                        break;
+                    }
+
+                    case 0x000A: { // Opcode: FX0A, Timer: KeyOp, A key press is awaited, and then stored in VX (blocking operation, all instruction halted until next key event).
+                        int x = (opcode & 0x0F00) >> 8;
+
+                        for (int i = 0; i < keyboard.getKeys().length; i++) {
+
+                            if (keyboard.isPressed(i)) {
+                                V[x] = (char) i;
+                                pc += 2;
+                                break;
+                            }
+                        }
+
+                        System.out.println("Waiting for key press to be stored in V[" + x + "]");
                         break;
                     }
 

@@ -156,4 +156,8 @@ public class Keyboard {
     public boolean isPressed(int i) {
         return keys[i];
     }
+
+    public boolean[] getKeys() {
+        return keys;
+    }
 }
