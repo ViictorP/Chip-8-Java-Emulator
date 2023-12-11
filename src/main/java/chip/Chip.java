@@ -70,18 +70,20 @@ public class Chip {
 
                 switch (opcode & 0x00FF) {
 
-                    case 0x00E0: // Opcode: 00E0, Type: Display, Clears the screen.
-
-                        System.err.println("Opcode não suportado");
-                        System.exit(0);
-
+                    case 0x00E0: { // Opcode: 00E0, Type: Display, Clears the screen.
+                        screen.clearDisplay();
+                        System.out.println("Clears the screen");
+                        pc += 2;
+                        needRedraw = true;
                         break;
+                    }
 
-                    case 0x00EE: // Opcode: 00EE, Type: Flow, Returns from a subroutine.
+                    case 0x00EE: { // Opcode: 00EE, Type: Flow, Returns from a subroutine.
                         stackPointer--;
                         pc = (char) (stack[stackPointer] + 2);
                         System.out.println("Return from a subroutine to " + Integer.toHexString(pc).toUpperCase());
                         break;
+                    }
 
                     default: // Opcode: 0NNN, Type: Call, Calls machine code routine (RCA 1802 for COSMAC VIP) at address NNN. Not necessary for most ROMs.
                         System.err.println("Opcode não suportado");
@@ -209,6 +211,15 @@ public class Chip {
 
                         V[x] = (char) ((V[x] - V[y]) & 0xFF);
                         pc += 2;
+                        break;
+                    }
+
+                    case 0x0006: { // Opcode: 8XY6, Type: BitOp, Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
+                        int x = (opcode & 0x0F00) >> 8;
+                        V[0xF] = (char) (V[x] & 0x1);
+                        V[x] = (char) (V[x] >> 1);
+                        pc += 2;
+                        System.out.println("Stores the least significant bit of V[" + x + "] in VF and then shifts V[" + x + "] to the right by 1.");
                         break;
                     }
 
@@ -368,6 +379,15 @@ public class Chip {
                         }
                         System.out.println("Setting V[0] to V[" + x + "] to the values of merory[0x" + Integer.toHexString(I & 0xFFFF).toUpperCase() + "]");
                         I = (char) (I + x + 1);
+                        pc += 2;
+                        break;
+                    }
+
+                    case 0x001E: { // Opcode: FX1E, Timer: MEM, Adds VX to I. VF is not affected.
+
+                        int x = (opcode & 0x0F00) >> 8;
+                        System.out.print("Adding V[" + x + "] = " + (int)V[x] + " to I");
+                        I += V[x];
                         pc += 2;
                         break;
                     }

@@ -26,7 +26,7 @@ public class Main extends Application {
         keyboard = new Keyboard();
         chip = new Chip(screen, keyboard);
         chip.init();
-        chip.gameLoader("src/main/resources/games/pong2.c8");
+        chip.gameLoader("src/main/resources/games/invaders.c8");
 
         stage.setTitle("Chip-8 Emulator");
         StackPane stackPane = new StackPane();

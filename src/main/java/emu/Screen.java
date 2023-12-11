@@ -38,6 +38,12 @@ public class Screen extends Canvas {
         }
     }
 
+    public void clearDisplay() {
+        for (int i = 0; i < display.length; i++) {
+            display[i] = 0;
+        }
+    }
+
     public byte[] getDisplay() {
         return display;
     }
