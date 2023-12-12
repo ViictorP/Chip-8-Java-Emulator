@@ -185,6 +185,16 @@ public class Chip {
                         break;
                     }
 
+                    case 0x0001: { // Opcode: 8XY1, Type: BitOp, Sets VX to VX or VY. (bitwise OR operation)
+                        int x = (opcode & 0x0F00) >> 8;
+                        int y = (opcode & 0x00F0) >> 4;
+                        System.out.println("Set V[" + x + "] to the bitwise OR operation between V[" + x + "] = " + (int) V[x] + " | V[" + y + "] = " + (int) V[y] + ", which is " + (V[x] ^ V[y]));
+
+                        V[x] = (char) ((V[x] | V[y]) & 0xFF);
+                        pc += 2;
+                        break;
+                    }
+
                     case 0x0002: { // Opcode: 8XY2, Type: BitOp, Sets VX to VX and VY. (bitwise AND operation)
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
@@ -199,9 +209,9 @@ public class Chip {
                     case 0x0003: { // Opcode: 8XY3, Type: BitOp, Sets VX to VX xor VY.
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
-                        System.out.println("Set V[" + x + "] to the bitwise XOR operation between V[" + x + "] = " + (int) V[x] + " & V[" + y + "] = " + (int) V[y] + ", which is " + (V[x] ^ V[y]));
+                        System.out.println("Set V[" + x + "] to the bitwise XOR operation between V[" + x + "] = " + (int) V[x] + " ^ V[" + y + "] = " + (int) V[y] + ", which is " + (V[x] ^ V[y]));
 
-                        V[x] = (char) (V[x] ^ V[y]);
+                        V[x] = (char) ((V[x] ^ V[y]) & 0xFF);
                         pc += 2;
                         break;
                     }
@@ -244,6 +254,31 @@ public class Chip {
                         V[x] = (char) (V[x] >> 1);
                         pc += 2;
                         System.out.println("Stores the least significant bit of V[" + x + "] in VF and then shifts V[" + x + "] to the right by 1.");
+                        break;
+                    }
+
+                    case 0x0007: { // Opcode: 8XY6, Type: BitOp, Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
+                        int x = (opcode & 0x0F00) >> 8;
+                        int y = (opcode & 0x00F0) >> 4;
+                        System.out.print("Subtracting V[" + x + "]  = " + (int) V[x] + " from V[" + y + "] = " + (int) V[y] + ", which is " + (V[y] - V[x]));
+                        if (V[x] > V[y]) {
+                            V[0xF] = 0;
+                        } else {
+                            V[0xF] = 1;
+                        }
+                        System.out.println(", Borrow (yes  0 / not 1)  :  " + (int) V[0xF]);
+
+                        V[x] = (char) ((V[y] - V[x]) & 0xFF);
+                        pc += 2;
+                        break;
+                    }
+
+                    case 0x000E: { // Opcode: 8XYE, Type: BitOp, Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
+                        int x = (opcode & 0x0F00) >> 8;
+                        V[0xF] = (char) (V[x] & 0x80);
+                        V[x] = (char) (V[x] << 1);
+                        pc += 2;
+                        System.out.println("Stores the least significant bit of V[" + x + "] in VF and then shifts V[" + x + "] to the left by 1.");
                         break;
                     }
 
