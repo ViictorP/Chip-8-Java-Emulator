@@ -128,8 +128,24 @@ public class Chip {
 
                 if (V[x] != nn) {
                     pc += 4;
+                    System.out.println("Skipping next instruction because V[" + x + "] = " + (int)V[x] + " != " + nn);
                 } else {
                     pc += 2;
+                    System.out.println("Not skipping next instruction because V[" + x + "] = " + (int)V[x] + " == " + nn);
+                }
+                break;
+            }
+
+            case 0x5000: { // Opcode: 5XY0, Type: Cond, Skips the next instruction if VX equals VY (usually the next instruction is a jump to skip a code block).
+                int x = (opcode & 0x0F00) >> 8;
+                int y = (opcode & 0x00F0) >> 4;
+
+                if (V[x] == V[y]) {
+                    pc += 4;
+                    System.out.println("Skipping next instruction because V[" + x + "] = " + (int)V[x] + " == V[" + y + "] = " + (int)V[y]);
+                } else {
+                    pc += 2;
+                    System.out.println("Not skipping next instruction because V[" + x + "] = " + (int)V[x] + " != V[" + y + "] = " + (int)V[y]);
                 }
                 break;
             }
@@ -153,7 +169,7 @@ public class Chip {
                 break;
             }
 
-            case 0x8000:
+            case 0x8000: {
 
                 switch (opcode & 0x000F) {
 
@@ -161,7 +177,7 @@ public class Chip {
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
 
-                        System.out.println("Setting V[x] = " + (int)V[x] + " to (int)V[y] = " + (int)V[y]);
+                        System.out.println("Setting V[x] = " + (int) V[x] + " to (int)V[y] = " + (int) V[y]);
 
                         V[x] = V[y];
 
@@ -172,7 +188,7 @@ public class Chip {
                     case 0x0002: { // Opcode: 8XY2, Type: BitOp, Sets VX to VX and VY. (bitwise AND operation)
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
-                        System.out.println("Set V[" + x + "] to the bitwise AND operation between V[" + x + "] = " + (int)V[x] + " & V[" + y + "] = " + (int)V[y] + ", which is " + (V[x] & V[y]));
+                        System.out.println("Set V[" + x + "] to the bitwise AND operation between V[" + x + "] = " + (int) V[x] + " & V[" + y + "] = " + (int) V[y] + ", which is " + (V[x] & V[y]));
                         V[x] = (char) (V[x] & V[y]);
 
                         pc += 2;
@@ -183,7 +199,7 @@ public class Chip {
                     case 0x0003: { // Opcode: 8XY3, Type: BitOp, Sets VX to VX xor VY.
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
-                        System.out.println("Set V[" + x + "] to the bitwise XOR operation between V[" + x + "] = " + (int)V[x] + " & V[" + y + "] = " + (int)V[y] + ", which is " + (V[x] ^ V[y]));
+                        System.out.println("Set V[" + x + "] to the bitwise XOR operation between V[" + x + "] = " + (int) V[x] + " & V[" + y + "] = " + (int) V[y] + ", which is " + (V[x] ^ V[y]));
 
                         V[x] = (char) (V[x] ^ V[y]);
                         pc += 2;
@@ -193,13 +209,13 @@ public class Chip {
                     case 0x0004: { // Opcode: 8XY4, Type: Math, Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there is not.
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
-                        System.out.print("Adding V[" + x + "] = " + (int)V[x]  + " to V[" + y + "] = " + (int)V[y]  + ", which is " + ((V[x] + V[y]) & 0xFF));
+                        System.out.print("Adding V[" + x + "] = " + (int) V[x] + " to V[" + y + "] = " + (int) V[y] + ", which is " + ((V[x] + V[y]) & 0xFF));
                         if (V[y] > 255 - V[x]) {
                             V[0xF] = 1;
                         } else {
                             V[0xF] = 0;
                         }
-                        System.out.println(", is Carry needed? " + (int)V[0xF]);
+                        System.out.println(", is Carry needed? " + (int) V[0xF]);
 
                         V[x] = (char) ((V[x] + V[y]) & 0xFF);
                         pc += 2;
@@ -209,13 +225,13 @@ public class Chip {
                     case 0x0005: { // Opcode: 8XY5, Type: Math, VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there is not.
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
-                        System.out.print("Subtracting V[" + y + "]  = " + (int)V[y]  + " from V[" + x + "] = " + (int)V[x]  + ", which is " + (V[y] + V[x]));
+                        System.out.print("Subtracting V[" + y + "]  = " + (int) V[y] + " from V[" + x + "] = " + (int) V[x] + ", which is " + (V[y] + V[x]));
                         if (V[y] > V[x]) {
                             V[0xF] = 0;
                         } else {
                             V[0xF] = 1;
                         }
-                        System.out.println(", Borrow (yes 0 / not 1)  :  " + (int)V[0xF]);
+                        System.out.println(", Borrow (yes 0 / not 1)  :  " + (int) V[0xF]);
 
                         V[x] = (char) ((V[x] - V[y]) & 0xFF);
                         pc += 2;
@@ -236,13 +252,34 @@ public class Chip {
                         System.exit(0);
                         break;
                 }
-
                 break;
+            }
+
+            case 0x9000: { // Opcode: 9XY0, Type: Cond, Skips the next instruction if VX does not equal VY. (Usually the next instruction is a jump to skip a code block);
+                int x = (opcode & 0x0F00) >> 8;
+                int y = (opcode & 0x00F0) >> 4;
+
+                if (V[x] != V[y]) {
+                    pc += 4;
+                    System.out.println("Skipping next instruction because V[" + x + "] = " + (int)V[x] + " != V[" + y + "] = " + (int)V[y]);
+                } else {
+                    pc += 2;
+                    System.out.println("Not skipping next instruction because V[" + x + "] = " + (int)V[x] + " == V[" + y + "] = " + (int)V[y]);
+                }
+                break;
+            }
 
             case 0xA000: { // Opcode: ANNN, Type: MEM, Sets I to the address NNN.
                 I = (char)(opcode & 0x0FFF);
                 pc += 2;
                 System.out.println("Set I to " + Integer.toHexString(I).toUpperCase());
+                break;
+            }
+
+            case 0xB000: { // Opcode: BNNN, Type: Flow, Jumps to the address NNN plus V0.
+                int address = opcode & 0x0FFF;
+                int v0 = V[0] & 0xFF;
+                pc = (char) (address + v0);
                 break;
             }
 
