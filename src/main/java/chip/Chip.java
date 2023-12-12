@@ -380,7 +380,6 @@ public class Chip {
                     }
 
                     case 0x00A1: { // Opcode: EXA1, Type: KeyOp, Skips the next instruction if the key stored in VX is not pressed (usually the next instruction is a jump to skip a code block).
-
                         int x = (opcode & 0x0F00) >> 8;
                         if (!keyboard.isPressed(V[x])) {
                             pc += 4;
