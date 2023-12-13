@@ -1,6 +1,7 @@
 package chip;
 
 import emu.Keyboard;
+import emu.Main;
 import emu.Screen;
 
 import java.io.DataInputStream;
@@ -85,13 +86,11 @@ public class Chip {
                         break;
                     }
 
-                    default: // Opcode: 0NNN, Type: Call, Calls machine code routine (RCA 1802 for COSMAC VIP) at address NNN. Not necessary for most ROMs.
+                    default:
                         System.err.println("Opcode não suportado");
                         System.exit(0);
                         break;
-
                 }
-
                 break;
             }
 
@@ -536,6 +535,7 @@ public class Chip {
                 } catch (IOException exception) { }
             }
         }
+        Main.getLoop().play();
     }
 
     public void fontLoader() {
