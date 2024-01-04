@@ -10,24 +10,28 @@ import java.io.IOException;
 
 public class Chip {
 
-    // char[] memory representa o memória do chip, 4kB / 4096 de memória 8-bits.
+    /**
+     * char[] memory represents the chip's memory, 4kB / 4096 of 8-bit memory.
+     */
     private char[] memory;
-    // char[] V representa os registers, são 16 registers de 8-bit nomeados em base hexadecimal de V0 até VF.
+
+    /**
+     * char[] V represents the registers, there are 16 8-bit registers named in hexadecimal base from V0 to VF.
+      */
     private char[] V;
-    // char I representa o endereço dos registers, 16-bit (só 12-bits são utilizados).
+    // char I represents the address of the registers, 16-bit (only 12-bits are used).
     private char I;
 
     private char pc;
 
-
-    // char[] stack representa a callstack ou pilha de execução, permite até 16 niveis de nesting.
+    // char[] stack represents the callstack or execution stack, allows up to 16 nesting levels.
     private char[] stack;
-    // Aponta para o próximo da pilha de execução.
+    // Points to the next one on the execution stack.
     private int stackPointer;
 
-    // Timer usado para delay eventos em programas e jogos.
+    // Timer used to delay events in programs and games.
     private int delay_timer;
-    // Timer usado para fazer sons.
+    // Timer used to make sounds.
     private int sound_timer;
 
     private Screen screen;
@@ -41,7 +45,7 @@ public class Chip {
         this.keyboard = keyboard;
     }
 
-    // Reseta a memória e os ponteiros do Chip-8
+    // Resets Chip-8's memory and pointers
     public void init() {
         memory = new char[4096];
         V = new char[16];
@@ -172,7 +176,7 @@ public class Chip {
 
                 switch (opcode & 0x000F) {
 
-                    case 0x0000: { // Opcode: 8XY0, Type: Assig, 	Sets VX to the value of VY.
+                    case 0x0000: { // Opcode: 8XY0, Type: Assig, Sets VX to the value of VY.
                         int x = (opcode & 0x0F00) >> 8;
                         int y = (opcode & 0x00F0) >> 4;
 
@@ -274,8 +278,8 @@ public class Chip {
 
                     case 0x000E: { // Opcode: 8XYE, Type: BitOp, Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
                         int x = (opcode & 0x0F00) >> 8;
-                        V[0xF] = (char) (V[x] & 0x80);
-                        V[x] = (char) (V[x] << 1);
+                        V[0xF] = (char)  ((V[x] >>> 7) == 0x1 ? 1 : 0);
+                        V[x] = (char) ((V[x] << 1) & 0xFF);
                         pc += 2;
                         System.out.println("Stores the least significant bit of V[" + x + "] in VF and then shifts V[" + x + "] to the left by 1.");
                         break;

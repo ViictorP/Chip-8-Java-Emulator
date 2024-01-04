@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 public class Keyboard {
 
-    // byte[] keys resenta os teclas do teclado.
+    // byte[] keys represent the keys of the keyboard
     private boolean[] keys;
 
     public Keyboard() {

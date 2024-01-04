@@ -11,7 +11,7 @@ public class Screen extends Canvas {
 
     private GraphicsContext graphicsContext;
 
-    // Representa os pixels da dela monocromatica.
+    // Represent the pixels of the monochromatic display.
     private byte[] display;
 
     public Screen() {

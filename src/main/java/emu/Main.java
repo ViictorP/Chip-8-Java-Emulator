@@ -8,7 +8,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -33,6 +32,7 @@ public class Main extends Application {
         chip = new Chip(screen, keyboard);
         chip.init();
 
+        // Menu to choose a ROM
         MenuBar menuBar = new MenuBar();
         Menu menu = new Menu("File");
         MenuItem loadRom = new MenuItem("Load ROM");
@@ -58,6 +58,7 @@ public class Main extends Application {
         scene.setOnKeyReleased(e -> keyboard.setKeysUnpressed(e.getCode()));
         stage.setScene(scene);
 
+        // Game Loop
         loop = new Timeline();
         loop.setCycleCount(Timeline.INDEFINITE);
 
